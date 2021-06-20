@@ -22,7 +22,6 @@ const headlineSchema = new mongoose.Schema({
 headlineSchema.set("toJSON", {
 	transform: (document, returnedObject) => {
 		delete returnedObject.__v;
-		returnedObject.id = returnedObject._id;
 	},
 });
 
