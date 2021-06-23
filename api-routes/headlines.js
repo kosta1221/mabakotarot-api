@@ -16,10 +16,17 @@ headlines.get("/", async (req, res, next) => {
 
 	const count = +req.query.count;
 	const page = +req.query.page;
+	const isSortAsc = req.query.isSortAsc === "true" ? true : false;
+
 	try {
 		const response = await Headline.find()
+			.sort([
+				["date", isSortAsc ? 1 : -1],
+				["site", 1],
+			])
 			.skip(count * (page - 1))
 			.limit(count);
+
 		console.log("number of headlines fetched: ", response.length);
 		res.status(200).json({ headlines: response });
 	} catch (err) {
