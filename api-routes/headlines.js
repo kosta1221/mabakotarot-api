@@ -18,8 +18,14 @@ headlines.get("/", async (req, res, next) => {
 	const page = +req.query.page;
 	const isSortAsc = req.query.isSortAsc === "true" ? true : false;
 
+	let query = {};
+	if (req.query.site) {
+		const site = req.query.site;
+		query = { site: { $eq: site } };
+	}
+
 	try {
-		const response = await Headline.find()
+		const response = await Headline.find(query)
 			.sort([
 				["date", isSortAsc ? 1 : -1],
 				["site", 1],
