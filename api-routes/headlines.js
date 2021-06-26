@@ -34,4 +34,19 @@ headlines.get("/", async (req, res, next) => {
 	}
 });
 
+headlines.get("/:date", async (req, res, next) => {
+	const { date } = req.params;
+
+	console.log(`trying to fetch headline with date ${date}...`);
+
+	try {
+		const response = await Headline.find({ date: { $regex: date } });
+
+		console.log("number of headlines fetched: ", response.length);
+		res.status(200).json({ headlines: response });
+	} catch (err) {
+		next(err);
+	}
+});
+
 module.exports = headlines;
