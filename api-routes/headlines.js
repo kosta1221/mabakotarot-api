@@ -42,11 +42,21 @@ headlines.get("/", async (req, res, next) => {
 
 headlines.get("/:date", async (req, res, next) => {
 	const { date } = req.params;
+	let query = {};
 
-	console.log(`trying to fetch headline with date ${date}...`);
+	const { endDate } = req.query;
+	console.log(endDate);
+
+	if (endDate) {
+		console.log(`trying to fetch headline between ${date} and ${endDate}...`);
+		query = { date: { $gte: date, $lte: endDate } };
+	} else {
+		console.log(`trying to fetch headline with date ${date}...`);
+		query = { date: { $regex: date } };
+	}
 
 	try {
-		const response = await Headline.find({ date: { $regex: date } });
+		const response = await Headline.find(query);
 
 		console.log("number of headlines fetched: ", response.length);
 		res.status(200).json({ headlines: response });
