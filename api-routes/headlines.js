@@ -45,14 +45,25 @@ headlines.get("/:date", async (req, res, next) => {
 	let query = {};
 
 	const { endDate } = req.query;
+	const { site } = req.query;
 	console.log(endDate);
 
 	if (endDate) {
-		console.log(`trying to fetch headline between ${date} and ${endDate}...`);
-		query = { date: { $gte: date, $lte: endDate } };
+		if (site) {
+			console.log(`trying to fetch headline between ${date} and ${endDate} of site ${site}...`);
+			query = { date: { $gte: date, $lte: endDate }, site: { $eq: site } };
+		} else {
+			console.log(`trying to fetch headline between ${date} and ${endDate}...`);
+			query = { date: { $gte: date, $lte: endDate } };
+		}
 	} else {
-		console.log(`trying to fetch headline with date ${date}...`);
-		query = { date: { $regex: date } };
+		if (site) {
+			console.log(`trying to fetch headline with date ${date} of site ${site}...`);
+			query = { date: { $regex: date }, site: { $eq: site } };
+		} else {
+			console.log(`trying to fetch headline with date ${date}...`);
+			query = { date: { $regex: date } };
+		}
 	}
 
 	try {
