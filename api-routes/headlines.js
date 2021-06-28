@@ -3,6 +3,7 @@ const { Router } = require("express");
 const headlines = Router();
 
 const Headline = require("../db/models/Headline");
+const { getQuery } = require("../utils");
 
 headlines.get("/", async (req, res, next) => {
 	console.log("trying to fetch headlines...");
@@ -18,11 +19,8 @@ headlines.get("/", async (req, res, next) => {
 	const page = +req.query.page;
 	const isSortAsc = req.query.isSortAsc === "true" ? true : false;
 
-	let query = {};
-	if (req.query.site) {
-		const site = req.query.site;
-		query = { site: { $eq: site } };
-	}
+	const { site, startDate, endDate } = req.query;
+	const query = getQuery(startDate, endDate, site);
 
 	try {
 		const response = await Headline.find(query)
@@ -32,42 +30,6 @@ headlines.get("/", async (req, res, next) => {
 			])
 			.skip(count * (page - 1))
 			.limit(count);
-
-		console.log("number of headlines fetched: ", response.length);
-		res.status(200).json({ headlines: response });
-	} catch (err) {
-		next(err);
-	}
-});
-
-headlines.get("/:date", async (req, res, next) => {
-	const { date } = req.params;
-	let query = {};
-
-	const { endDate } = req.query;
-	const { site } = req.query;
-	console.log(endDate);
-
-	if (endDate) {
-		if (site) {
-			console.log(`trying to fetch headline between ${date} and ${endDate} of site ${site}...`);
-			query = { date: { $gte: date, $lte: endDate }, site: { $eq: site } };
-		} else {
-			console.log(`trying to fetch headline between ${date} and ${endDate}...`);
-			query = { date: { $gte: date, $lte: endDate } };
-		}
-	} else {
-		if (site) {
-			console.log(`trying to fetch headline with date ${date} of site ${site}...`);
-			query = { date: { $regex: date }, site: { $eq: site } };
-		} else {
-			console.log(`trying to fetch headline with date ${date}...`);
-			query = { date: { $regex: date } };
-		}
-	}
-
-	try {
-		const response = await Headline.find(query);
 
 		console.log("number of headlines fetched: ", response.length);
 		res.status(200).json({ headlines: response });
