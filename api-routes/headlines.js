@@ -3,6 +3,7 @@ const { Router } = require("express");
 const headlines = Router();
 
 const Headline = require("../db/models/Headline");
+const { getQuery } = require("../utils");
 
 headlines.get("/", async (req, res, next) => {
 	console.log("trying to fetch headlines...");
@@ -18,8 +19,12 @@ headlines.get("/", async (req, res, next) => {
 	const page = +req.query.page;
 	const isSortAsc = req.query.isSortAsc === "true" ? true : false;
 
+	const { sites, startDate, endDate } = req.query;
+	const parsedSites = JSON.parse(sites);
+	const query = getQuery(startDate, endDate, parsedSites);
+
 	try {
-		const response = await Headline.find()
+		const response = await Headline.find(query)
 			.sort([
 				["date", isSortAsc ? 1 : -1],
 				["site", 1],
