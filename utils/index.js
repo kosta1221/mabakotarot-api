@@ -1,30 +1,30 @@
-const getQuery = (startDate, endDate, site) => {
+const getQuery = (startDate, endDate, sites) => {
 	let query = {};
 
 	if (startDate) {
 		if (endDate) {
-			if (site) {
+			if (sites) {
 				console.log(
-					`trying to fetch headlines between ${startDate} and ${endDate} of site ${site}...`
+					`trying to fetch headlines between ${startDate} and ${endDate} of sites ${sites}...`
 				);
-				query = { date: { $gte: startDate, $lte: endDate }, site: { $eq: site } };
+				query = { date: { $gte: startDate, $lte: endDate }, site: { $in: sites } };
 			} else {
 				console.log(`trying to fetch headlines between ${startDate} and ${endDate}...`);
 				query = { date: { $gte: startDate, $lte: endDate } };
 			}
 		} else {
-			if (site) {
-				console.log(`trying to fetch headlines with date ${startDate} of site ${site}...`);
-				query = { date: { $regex: startDate }, site: { $eq: site } };
+			if (sites) {
+				console.log(`trying to fetch headlines with date ${startDate} of sites ${sites}...`);
+				query = { date: { $regex: startDate }, site: { $in: sites } };
 			} else {
 				console.log(`trying to fetch headlines with date ${startDate}...`);
 				query = { date: { $regex: startDate } };
 			}
 		}
 	} else {
-		if (site) {
-			console.log(`trying to fetch headlines of site ${site}...`);
-			query = { site: { $eq: site } };
+		if (sites) {
+			console.log(`trying to fetch headlines of sites ${sites}...`);
+			query = { site: { $in: sites } };
 		}
 	}
 
