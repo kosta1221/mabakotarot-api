@@ -19,9 +19,15 @@ headlines.get("/", async (req, res, next) => {
 	const page = +req.query.page;
 	const isSortAsc = req.query.isSortAsc === "true" ? true : false;
 
-	const { sites, startDate, endDate } = req.query;
+	const { sites, startDate, endDate, search } = req.query;
 	const parsedSites = JSON.parse(sites);
-	const query = getQuery(startDate, endDate, parsedSites);
+
+	let query;
+	if (search) {
+		query = { titleText: { $regex: search } };
+	} else {
+		query = getQuery(startDate, endDate, parsedSites);
+	}
 
 	try {
 		const response = await Headline.find(query)
