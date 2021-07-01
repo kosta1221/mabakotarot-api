@@ -20,7 +20,8 @@ headlines.get("/", async (req, res, next) => {
 	const isSortAsc = req.query.isSortAsc === "true" ? true : false;
 
 	const { sites, startDate, endDate, search } = req.query;
-	const parsedSites = JSON.parse(sites);
+
+	const parsedSites = sites && JSON.parse(sites);
 
 	let query;
 	if (search) {

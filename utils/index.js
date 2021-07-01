@@ -3,7 +3,7 @@ const getQuery = (startDate, endDate, sites) => {
 
 	if (startDate) {
 		if (endDate) {
-			if (sites.length > 0) {
+			if (sites && sites.length > 0) {
 				console.log(
 					`trying to fetch headlines between ${startDate} and ${endDate} of sites ${sites}...`
 				);
@@ -13,7 +13,7 @@ const getQuery = (startDate, endDate, sites) => {
 				query = { date: { $gte: startDate, $lte: endDate } };
 			}
 		} else {
-			if (sites.length > 0) {
+			if (sites && sites.length > 0) {
 				console.log(`trying to fetch headlines with date ${startDate} of sites ${sites}...`);
 				query = { date: { $regex: startDate }, site: { $in: sites } };
 			} else {
@@ -22,7 +22,7 @@ const getQuery = (startDate, endDate, sites) => {
 			}
 		}
 	} else {
-		if (sites.length > 0) {
+		if (sites && sites.length > 0) {
 			console.log(`trying to fetch headlines of sites ${sites}...`);
 			query = { site: { $in: sites } };
 		}
