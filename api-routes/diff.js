@@ -14,9 +14,9 @@ diff.get("/", async (req, res, next) => {
 	const s3Url2 = getS3UrlFromSiteAndFileName(site2, fileName2);
 
 	try {
-		const { diffNum, diffPercentage } = await getDiffFromUrl(s3Url1, s3Url2);
+		const { diff, diffNum, diffPercentage } = await getDiffFromUrl(s3Url1, s3Url2);
 
-		res.status(200).json({ diffNum, diffPercentage });
+		res.status(200).json({ diff, diffNum, diffPercentage });
 	} catch (err) {
 		next(err);
 	}

@@ -11,7 +11,7 @@ headlines.get("/", async (req, res, next) => {
 	if (!req.query.page || !req.query.count) {
 		return res.status(400).send("Bad request!");
 	}
-	if (req.query.page <= 0 || req.query.count <= 0) {
+	if (req.query.page <= 0 || req.query.count < 0) {
 		return res.status(400).send("Bad request!");
 	}
 
