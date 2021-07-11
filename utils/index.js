@@ -4,7 +4,7 @@ require("dotenv").config();
 const getQuery = (startDate, endDate, sites, unique) => {
 	let query = {};
 
-	const uniqueWord = unique ? "unique" : null;
+	const uniqueWord = unique ? "unique" : "";
 
 	if (startDate) {
 		if (endDate) {

@@ -11,12 +11,12 @@ headlines.get("/", async (req, res, next) => {
 	if (!req.query.page || !req.query.count) {
 		return res.status(400).send("Bad request!");
 	}
-	if (req.query.page <= 0 || req.query.count < 0) {
+	if (req.query.page < 0 || req.query.count < 0) {
 		return res.status(400).send("Bad request!");
 	}
 
 	const count = +req.query.count;
-	const page = +req.query.page;
+	const page = +req.query.page === 0 ? 1 : +req.query.page;
 	const isSortAsc = req.query.isSortAsc === "true" ? true : false;
 	const unique = req.query.unique === "true" ? true : false;
 
@@ -45,6 +45,7 @@ headlines.get("/", async (req, res, next) => {
 			.limit(count);
 
 		console.log("number of headlines fetched: ", response.length);
+		console.log("original page: ", +req.query.page);
 		res.status(200).json({ headlines: response });
 	} catch (err) {
 		next(err);
