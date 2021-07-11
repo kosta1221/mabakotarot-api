@@ -18,6 +18,7 @@ headlines.get("/", async (req, res, next) => {
 	const count = +req.query.count;
 	const page = +req.query.page;
 	const isSortAsc = req.query.isSortAsc === "true" ? true : false;
+	const unique = req.query.unique === "true" ? true : false;
 
 	const { sites, startDate, endDate, search } = req.query;
 
@@ -26,8 +27,12 @@ headlines.get("/", async (req, res, next) => {
 	let query;
 	if (search) {
 		query = { titleText: { $regex: search } };
+
+		if (unique) {
+			query.isTextUnique = { $eq: true };
+		}
 	} else {
-		query = getQuery(startDate, endDate, parsedSites);
+		query = getQuery(startDate, endDate, parsedSites, unique);
 	}
 
 	try {
