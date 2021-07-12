@@ -11,17 +11,29 @@ headlines.get("/", async (req, res, next) => {
 	if (!req.query.page || !req.query.count) {
 		return res.status(400).send("Bad request!");
 	}
-	if (req.query.page <= 0 || req.query.count <= 0) {
+	if (req.query.page < 0 || req.query.count < 0) {
 		return res.status(400).send("Bad request!");
 	}
 
 	const count = +req.query.count;
-	const page = +req.query.page;
+	const page = +req.query.page === 0 ? 1 : +req.query.page;
 	const isSortAsc = req.query.isSortAsc === "true" ? true : false;
+	const unique = req.query.unique === "true" ? true : false;
 
-	const { sites, startDate, endDate } = req.query;
-	const parsedSites = JSON.parse(sites);
-	const query = getQuery(startDate, endDate, parsedSites);
+	const { sites, startDate, endDate, search } = req.query;
+
+	const parsedSites = sites && JSON.parse(sites);
+
+	let query;
+	if (search) {
+		query = { titleText: { $regex: search } };
+
+		if (unique) {
+			query.isTextUnique = { $eq: true };
+		}
+	} else {
+		query = getQuery(startDate, endDate, parsedSites, unique);
+	}
 
 	try {
 		const response = await Headline.find(query)
@@ -33,6 +45,7 @@ headlines.get("/", async (req, res, next) => {
 			.limit(count);
 
 		console.log("number of headlines fetched: ", response.length);
+		console.log("original page: ", +req.query.page);
 		res.status(200).json({ headlines: response });
 	} catch (err) {
 		next(err);
