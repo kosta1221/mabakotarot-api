@@ -51,7 +51,9 @@ headlines.get("/", async (req, res, next) => {
 		if (foundByQuery.length > 0) {
 			response = [...foundByQuery];
 
-			if (unique && startDate) {
+			const doesCountPermitAddingFirstHeadline = count === 0 || count > foundByQuery.length;
+
+			if (unique && startDate && doesCountPermitAddingFirstHeadline) {
 				// first headline which is not unique to db, but unique to this query. Only applies when querying for unique headlines and when a start date is set.
 				const firstHeadline = await Headline.findOne(sameQueryNotUnique).sort([["date", 1]]);
 
