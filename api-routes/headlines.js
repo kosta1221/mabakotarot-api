@@ -3,7 +3,7 @@ const { Router } = require("express");
 const headlines = Router();
 
 const Headline = require("../db/models/Headline");
-const { getQuery } = require("../utils");
+const { getQuery, getQueryNoLogs } = require("../utils");
 
 headlines.get("/", async (req, res, next) => {
 	console.log("trying to fetch headlines...");
@@ -25,6 +25,7 @@ headlines.get("/", async (req, res, next) => {
 	const parsedSites = sites && JSON.parse(sites);
 
 	let query;
+	let sameQueryNotUnique;
 	if (search) {
 		query = { titleText: { $regex: search } };
 
@@ -33,10 +34,11 @@ headlines.get("/", async (req, res, next) => {
 		}
 	} else {
 		query = getQuery(startDate, endDate, parsedSites, unique);
+		sameQueryNotUnique = getQueryNoLogs(startDate, endDate, parsedSites, false);
 	}
 
 	try {
-		const response = await Headline.find(query)
+		const foundByQuery = await Headline.find(query)
 			.sort([
 				["date", isSortAsc ? 1 : -1],
 				["site", 1],
@@ -44,8 +46,34 @@ headlines.get("/", async (req, res, next) => {
 			.skip(count * (page - 1))
 			.limit(count);
 
-		console.log("number of headlines fetched: ", response.length);
-		console.log("original page: ", +req.query.page);
+		let response = [];
+
+		if (foundByQuery.length > 0) {
+			response = [...foundByQuery];
+
+			const doesCountPermitAddingFirstHeadline = count === 0 || count > foundByQuery.length;
+
+			if (unique && startDate && doesCountPermitAddingFirstHeadline) {
+				// first headline which is not unique to db, but unique to this query. Only applies when querying for unique headlines and when a start date is set.
+				const firstHeadline = await Headline.findOne(sameQueryNotUnique).sort([["date", 1]]);
+
+				if (
+					firstHeadline &&
+					foundByQuery.filter((headline) => headline._id === firstHeadline._id).length < 1
+				) {
+					response = isSortAsc
+						? [firstHeadline, ...foundByQuery]
+						: [...foundByQuery, firstHeadline];
+				}
+				// console.log("first headline found : ", firstHeadline);
+			}
+
+			console.log("found by query length: ", foundByQuery.length);
+			console.log("number of headlines fetched: ", response.length);
+			console.log("original page: ", +req.query.page);
+			console.log("page: ", page);
+		}
+
 		res.status(200).json({ headlines: response });
 	} catch (err) {
 		next(err);
