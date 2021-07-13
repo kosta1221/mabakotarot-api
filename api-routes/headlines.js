@@ -46,33 +46,27 @@ headlines.get("/", async (req, res, next) => {
 			.skip(count * (page - 1))
 			.limit(count);
 
-		let response = [];
+		let response = [...foundByQuery];
 
-		if (foundByQuery.length > 0) {
-			response = [...foundByQuery];
+		const doesCountPermitAddingFirstHeadline = count === 0 || count > foundByQuery.length;
 
-			const doesCountPermitAddingFirstHeadline = count === 0 || count > foundByQuery.length;
+		if (unique && startDate && doesCountPermitAddingFirstHeadline) {
+			// first headline which is not unique to db, but unique to this query. Only applies when querying for unique headlines and when a start date is set.
+			const firstHeadline = await Headline.findOne(sameQueryNotUnique).sort([["date", 1]]);
 
-			if (unique && startDate && doesCountPermitAddingFirstHeadline) {
-				// first headline which is not unique to db, but unique to this query. Only applies when querying for unique headlines and when a start date is set.
-				const firstHeadline = await Headline.findOne(sameQueryNotUnique).sort([["date", 1]]);
-
-				if (
-					firstHeadline &&
-					foundByQuery.filter((headline) => headline._id === firstHeadline._id).length < 1
-				) {
-					response = isSortAsc
-						? [firstHeadline, ...foundByQuery]
-						: [...foundByQuery, firstHeadline];
-				}
-				// console.log("first headline found : ", firstHeadline);
+			if (
+				firstHeadline &&
+				foundByQuery.filter((headline) => headline._id.equals(firstHeadline._id)).length < 1
+			) {
+				response = isSortAsc ? [firstHeadline, ...foundByQuery] : [...foundByQuery, firstHeadline];
 			}
-
-			console.log("found by query length: ", foundByQuery.length);
-			console.log("number of headlines fetched: ", response.length);
-			console.log("original page: ", +req.query.page);
-			console.log("page: ", page);
+			// console.log("first headline found : ", firstHeadline);
 		}
+
+		console.log("found by query length: ", foundByQuery.length);
+		console.log("number of headlines fetched: ", response.length);
+		console.log("original page: ", +req.query.page);
+		console.log("page: ", page);
 
 		res.status(200).json({ headlines: response });
 	} catch (err) {
