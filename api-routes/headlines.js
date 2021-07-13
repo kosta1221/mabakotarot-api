@@ -59,7 +59,9 @@ headlines.get("/", async (req, res, next) => {
 					firstHeadline &&
 					foundByQuery.filter((headline) => headline._id === firstHeadline._id).length < 1
 				) {
-					response = [firstHeadline, ...foundByQuery];
+					response = isSortAsc
+						? [firstHeadline, ...foundByQuery]
+						: [...foundByQuery, firstHeadline];
 				}
 				// console.log("first headline found : ", firstHeadline);
 			}
