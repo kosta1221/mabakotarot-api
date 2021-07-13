@@ -44,6 +44,38 @@ const getQuery = (startDate, endDate, sites, unique) => {
 	return query;
 };
 
+const getQueryNoLogs = (startDate, endDate, sites, unique) => {
+	let query = {};
+
+	const uniqueWord = unique ? "unique" : "";
+
+	if (startDate) {
+		if (endDate) {
+			if (sites && sites.length > 0) {
+				query = { date: { $gte: startDate, $lte: endDate }, site: { $in: sites } };
+			} else {
+				query = { date: { $gte: startDate, $lte: endDate } };
+			}
+		} else {
+			if (sites && sites.length > 0) {
+				query = { date: { $regex: startDate }, site: { $in: sites } };
+			} else {
+				query = { date: { $regex: startDate } };
+			}
+		}
+	} else {
+		if (sites && sites.length > 0) {
+			query = { site: { $in: sites } };
+		}
+	}
+
+	if (unique) {
+		query.isTextUnique = { $eq: true };
+	}
+
+	return query;
+};
+
 const getFileNameFromOptions = (options) => {
 	const { year, month, day, hour, minute } = options;
 
@@ -82,6 +114,7 @@ const getS3UrlFromSiteAndFileName = (site, fileName, format = "webp") => {
 
 module.exports = {
 	getQuery,
+	getQueryNoLogs,
 	getFileNameFromOptions,
 	getDateFromOptions,
 	getS3UrlFromSiteAndFileName,
